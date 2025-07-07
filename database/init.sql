@@ -1,0 +1,17 @@
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    firstname VARCHAR(255) NOT NULL,
+    lastname VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    content TEXT NOT NULL,
+    sender_id INT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+);
+

@@ -1,0 +1,52 @@
+name: chat-app
+version: '1.0'
+services:
+  postgres:
+    container_name: postgreschatserver
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PW}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5433:5433"
+    restart: always
+    networks:
+      - app-network
+
+  pgadmin:
+    container_name: pgadminchatserver
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_MAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PW}
+    ports:
+      - "5055:85"
+    restart: always
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  chatserver:
+    build: ./chatserver
+    ports:
+      - "5005:85"
+    depends_on:
+      - postgres
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:85
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PW}
+    networks:
+      - app-network
+
+volumes:
+  postgres:
+
+networks:
+  app-network:
+    driver: bridge
