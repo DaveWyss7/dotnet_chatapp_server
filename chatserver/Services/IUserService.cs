@@ -11,6 +11,7 @@ namespace ChatServer.Services
         Task<bool> UsernameExistsAsync(string username);
         Task<bool> EmailExistsAsync(string email);
         Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<bool> UsernameExistsAsync(object username);
     }
 
 }

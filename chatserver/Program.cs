@@ -1,11 +1,18 @@
 using ChatServer.Middleware;
+using ChatServer.Models;
+using Microsoft.AspNetCore.Identity;
+using ChatServer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// builder.Services.AddControllers();
+builder.Services.AddControllers();
 // builder.Services.AddEndpointsApiExplorer();
 // builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 // CORS policy
 // builder.Services.AddCors(options =>

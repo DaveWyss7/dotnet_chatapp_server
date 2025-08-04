@@ -6,7 +6,7 @@ namespace ChatServer.Services
         public async Task<User> CreateUserAsync(User user)
         {
             // Implement logic to create a user
-            if (await UsernameExistsAsync(user.Username))
+            if (await UsernameExistsAsync(user.UserName))
             {
                 throw new Exception("Username already exists");
             }
@@ -16,6 +16,10 @@ namespace ChatServer.Services
                 throw new Exception("Email already exists");
             }
             throw new NotImplementedException();
+
+            user.Id = ""
+            _user.Add(user);
+            return user;
         }
 
         public async Task<User?> GetUserByIdAsync(int id)
