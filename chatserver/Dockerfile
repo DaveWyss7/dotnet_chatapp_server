@@ -1,16 +1,17 @@
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
-EXPOSE 80
+EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-COPY ["chatserver.csproj", "./"]
-RUN dotnet restore
+COPY ["chatserver.csproj", "."]
+RUN dotnet restore "./chatserver.csproj"
 COPY . .
-RUN dotnet build -c Release -o /app/build
+WORKDIR "/src/."
+RUN dotnet build "chatserver.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish "chatserver.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app

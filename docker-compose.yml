@@ -1,52 +1,83 @@
 name: chat-app
 version: '1.0'
+
 services:
+  # PostgreSQL Database (deine bestehende Config)
   postgres:
-    container_name: postgreschatserver
-    image: postgres:latest
+    image: postgres:15
+    container_name: chatapp-postgres
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PW}
-      - POSTGRES_DB=${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PW}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${DB_PORT}:5432"
     volumes:
-      - postgres:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5433:5433"
-    restart: always
+      - postgres_data:/var/lib/postgresql/data
     networks:
-      - app-network
+      - chatapp-network
+    restart: unless-stopped
 
-  pgadmin:
-    container_name: pgadminchatserver
-    image: dpage/pgadmin4:latest
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_MAIL}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PW}
-    ports:
-      - "5055:85"
-    restart: always
-    depends_on:
-      - postgres
-    networks:
-      - app-network
-
+  # .NET Backend API
   chatserver:
-    build: ./chatserver
-    ports:
-      - "5005:85"
-    depends_on:
-      - postgres
+    build:
+      context: ./chatserver
+      dockerfile: Dockerfile
+    container_name: chatapp-backend
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:85
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PW}
+      - ASPNETCORE_URLS=http://+:8080
+      # ✅ Verwende deine bestehenden .env Variablen
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PW=${POSTGRES_PW}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - JWT_EXPIRY_HOURS=${JWT_EXPIRY_HOURS}
+      # ✅ Für Docker: DB Host ist der Service Name
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
     networks:
-      - app-network
+      - chatapp-network
+    restart: unless-stopped
+
+  # Frontend UI
+  chat-ui:
+    build:
+      context: ./chat-ui
+      dockerfile: Dockerfile
+    container_name: chatapp-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - chatserver
+    networks:
+      - chatapp-network
+    restart: unless-stopped
+
+  # pgAdmin (deine bestehende Config)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: chatapp-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_MAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PW}
+    ports:
+      - "8081:80"
+    depends_on:
+      - postgres
+    networks:
+      - chatapp-network
+    restart: unless-stopped
 
 volumes:
-  postgres:
+  postgres_data:
 
 networks:
-  app-network:
+  chatapp-network:
     driver: bridge

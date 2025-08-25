@@ -33,3 +33,11 @@ Komponente	Verantwortung	Beispiel
 AuthController	API Endpunkte, JWT, Validation	/api/auth/login, /api/auth/register
 UserService	Business Logic, CRUD	CreateUserAsync(), GetUserByIdAsync()
 User Model	Datenstruktur	Properties, Validation Attributes
+
+
+## 25.08.25
+🎯 URLs mit deinen Namen:
+🖥️ Chat UI: http://localhost:3000
+🔧 Backend API: http://localhost:8080/swagger
+🗄️ pgAdmin: http://localhost:8081 (mit deinen PGADMIN credentials)
+📊 Database: localhost:5433 (dein bestehender Port)
